@@ -52,11 +52,12 @@ namespace com.udragan.csharp.CommandLineParser.Attributes
 		}
 
 		/// <summary>
-		/// Gets a value indicating whether this <see cref="SwitchAttribute"/> is required.
+		/// Gets or sets a value indicating whether this <see cref="SwitchAttribute" /> is required.
 		/// </summary>
 		public bool Required
 		{
 			get { return _required; }
+			set { _required = value; }
 		}
 
 		#endregion
