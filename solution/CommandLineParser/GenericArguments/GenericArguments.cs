@@ -1,4 +1,4 @@
-﻿namespace com.udragan.csharp.CommandLineParser.Options
+﻿namespace com.udragan.csharp.CommandLineParser.Arguments
 {
 	/// <summary>
 	/// Base class for generic arguments.
