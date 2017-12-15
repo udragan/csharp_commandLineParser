@@ -14,7 +14,7 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 	{
 		#region Members
 
-		private IDictionary<SwitchAttribute, PropertyInfo> _mappedProps = new Dictionary<SwitchAttribute, PropertyInfo>();
+		private IDictionary<SwitchAttribute, PropertyInfo> _mappedProperties = new Dictionary<SwitchAttribute, PropertyInfo>();
 
 		#endregion
 
@@ -46,7 +46,7 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 		/// <param name="args">The arguments.</param>
 		public GenericArguments(string[] args)
 		{
-			_mappedProps = ExtractClassArgumentProperties();
+			_mappedProperties = ExtractClassArgumentProperties();
 
 			if (args.Contains(HelpSwitchAttribute.OptionName))
 			{
@@ -55,6 +55,22 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			}
 
 			ProcessArguments(args);
+		}
+
+		#endregion
+
+		#region Public methods
+
+		[Pure]
+		public void DisplayOptions()
+		{
+			int maxArgumentLength = _mappedProperties.Values.Max(x => x.Name.Length);
+
+			foreach (PropertyInfo item in _mappedProperties.Values)
+			{
+				Console.Write(item.Name.PadRight(maxArgumentLength + 2));
+				Console.WriteLine(item.GetValue(this));
+			}
 		}
 
 		#endregion
@@ -88,12 +104,12 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			{
 				string argument = queue.Dequeue();
 
-				SwitchAttribute attribute = _mappedProps.Keys
+				SwitchAttribute attribute = _mappedProperties.Keys
 					.FirstOrDefault(x => x.OptionName.Equals(argument, StringComparison.OrdinalIgnoreCase));
 
 				if (attribute != null)
 				{
-					PropertyInfo propertyInfo = _mappedProps[attribute];
+					PropertyInfo propertyInfo = _mappedProperties[attribute];
 					propertyInfo.SetValue(this, true);
 				}
 			}
@@ -102,9 +118,9 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 		[Pure]
 		private void DisplayHelp()
 		{
-			int maxArgumentLength = _mappedProps.Keys.Max(x => x.OptionName.Length);
+			int maxArgumentLength = _mappedProperties.Keys.Max(x => x.OptionName.Length);
 
-			foreach (PropertyInfo item in _mappedProps.Values)
+			foreach (PropertyInfo item in _mappedProperties.Values)
 			{
 				SwitchAttribute customAttribute = (SwitchAttribute)item.GetCustomAttributes(typeof(SwitchAttribute)).First();
 

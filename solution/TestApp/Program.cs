@@ -9,6 +9,8 @@ namespace com.udragan.csharp.TestApp
 		{
 			CustomArguments co = new CustomArguments(args);
 
+			co.DisplayOptions();
+
 			Console.ReadLine();
 		}
 	}
