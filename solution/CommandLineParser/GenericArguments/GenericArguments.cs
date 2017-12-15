@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using com.udragan.csharp.CommandLineParser.Attributes;
@@ -13,7 +14,7 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 	{
 		#region Members
 
-		private IDictionary<string, PropertyInfo> mappedProps = new Dictionary<string, PropertyInfo>();
+		private IDictionary<SwitchAttribute, PropertyInfo> _mappedProps = new Dictionary<SwitchAttribute, PropertyInfo>();
 
 		#endregion
 
@@ -37,7 +38,6 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 
 		#endregion
 
-
 		#region Constructors
 
 		/// <summary>
@@ -46,6 +46,26 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 		/// <param name="args">The arguments.</param>
 		public GenericArguments(string[] args)
 		{
+			_mappedProps = ExtractClassArgumentProperties();
+
+			if (args.Contains(HelpSwitchAttribute.OptionName))
+			{
+				DisplayHelp();
+				return;
+			}
+
+			ProcessArguments(args);
+		}
+
+		#endregion
+
+		#region Private methods
+
+		[Pure]
+		private IDictionary<SwitchAttribute, PropertyInfo> ExtractClassArgumentProperties()
+		{
+			IDictionary<SwitchAttribute, PropertyInfo> result = new Dictionary<SwitchAttribute, PropertyInfo>();
+
 			PropertyInfo[] switchArgumentProperties = this.GetType()
 				.GetProperties()
 				.Where(x => x.IsDefined(typeof(SwitchAttribute)))
@@ -54,25 +74,37 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			foreach (PropertyInfo item in switchArgumentProperties)
 			{
 				SwitchAttribute customAttribute = (SwitchAttribute)item.GetCustomAttribute(typeof(SwitchAttribute));
-				mappedProps[customAttribute.OptionName] = item;
+				result[customAttribute] = item;
 			}
 
-			if (args.Contains(HelpSwitchAttribute.OptionName))
+			return result;
+		}
+
+		private void ProcessArguments(string[] args)
+		{
+			Queue<string> queue = new Queue<string>(args);
+
+			while (queue.Count > 0)
 			{
-				DisplayHelp();
-				return;
+				string argument = queue.Dequeue();
+
+				SwitchAttribute attribute = _mappedProps.Keys
+					.FirstOrDefault(x => x.OptionName.Equals(argument, StringComparison.OrdinalIgnoreCase));
+
+				if (attribute != null)
+				{
+					PropertyInfo propertyInfo = _mappedProps[attribute];
+					propertyInfo.SetValue(this, true);
+				}
 			}
 		}
 
-		#endregion
-
-		#region Private methods
-
+		[Pure]
 		private void DisplayHelp()
 		{
-			int maxArgumentLength = mappedProps.Keys.Max(x => x.Length);
+			int maxArgumentLength = _mappedProps.Keys.Max(x => x.OptionName.Length);
 
-			foreach (PropertyInfo item in mappedProps.Values)
+			foreach (PropertyInfo item in _mappedProps.Values)
 			{
 				SwitchAttribute customAttribute = (SwitchAttribute)item.GetCustomAttributes(typeof(SwitchAttribute)).First();
 
