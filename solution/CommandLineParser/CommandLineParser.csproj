@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\BaseAttribute.cs" />
     <Compile Include="Attributes\SwitchAttribute.cs" />
     <Compile Include="GenericArguments\GenericArguments.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
