@@ -10,11 +10,11 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 	/// <summary>
 	/// Base class for generic arguments.
 	/// </summary>
-	public class GenericArguments
+	public abstract class GenericArguments
 	{
 		#region Members
 
-		private IDictionary<SwitchAttribute, PropertyInfo> _mappedProperties = new Dictionary<SwitchAttribute, PropertyInfo>();
+		private IDictionary<BaseAttribute, PropertyInfo> _mappedProperties = new Dictionary<BaseAttribute, PropertyInfo>();
 
 		#endregion
 
@@ -61,15 +61,25 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 
 		#region Public methods
 
+		/// <summary>
+		/// Displays the options.
+		/// </summary>
 		[Pure]
 		public void DisplayOptions()
 		{
+			if (!_mappedProperties.Any())
+			{
+				Console.WriteLine("No options available.");
+				return;
+			}
+
 			int maxArgumentLength = _mappedProperties.Values.Max(x => x.Name.Length);
 
-			foreach (PropertyInfo item in _mappedProperties.Values)
+			//TODO: convert to factory.
+			foreach (KeyValuePair<BaseAttribute, PropertyInfo> item in _mappedProperties)
 			{
-				Console.Write(item.Name.PadRight(maxArgumentLength + 2));
-				Console.WriteLine(item.GetValue(this));
+				Console.Write(item.Value.Name.PadRight(maxArgumentLength + 2));
+				Console.WriteLine(item.Value.GetValue(this) ?? ((OptionAttribute)item.Key).DefaultValue);
 			}
 		}
 
@@ -78,18 +88,18 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 		#region Private methods
 
 		[Pure]
-		private IDictionary<SwitchAttribute, PropertyInfo> ExtractClassArgumentProperties()
+		private IDictionary<BaseAttribute, PropertyInfo> ExtractClassArgumentProperties()
 		{
-			IDictionary<SwitchAttribute, PropertyInfo> result = new Dictionary<SwitchAttribute, PropertyInfo>();
+			IDictionary<BaseAttribute, PropertyInfo> result = new Dictionary<BaseAttribute, PropertyInfo>();
 
 			PropertyInfo[] switchArgumentProperties = this.GetType()
 				.GetProperties()
-				.Where(x => x.IsDefined(typeof(SwitchAttribute)))
+				.Where(x => x.IsDefined(typeof(BaseAttribute)))
 				.ToArray();
 
 			foreach (PropertyInfo item in switchArgumentProperties)
 			{
-				SwitchAttribute customAttribute = (SwitchAttribute)item.GetCustomAttribute(typeof(SwitchAttribute));
+				BaseAttribute customAttribute = (BaseAttribute)item.GetCustomAttribute(typeof(BaseAttribute));
 				result[customAttribute] = item;
 			}
 
@@ -104,7 +114,7 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			{
 				string argument = queue.Dequeue();
 
-				SwitchAttribute attribute = _mappedProperties.Keys
+				BaseAttribute attribute = _mappedProperties.Keys
 					.FirstOrDefault(x => x.OptionName.Equals(argument, StringComparison.OrdinalIgnoreCase));
 
 				if (attribute != null)
@@ -122,7 +132,7 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 
 			foreach (PropertyInfo item in _mappedProperties.Values)
 			{
-				SwitchAttribute customAttribute = (SwitchAttribute)item.GetCustomAttributes(typeof(SwitchAttribute)).First();
+				BaseAttribute customAttribute = (BaseAttribute)item.GetCustomAttributes(typeof(BaseAttribute)).First();
 
 				Console.Write(customAttribute.OptionName.PadRight(maxArgumentLength + 2));
 				Console.Write(customAttribute.Help);

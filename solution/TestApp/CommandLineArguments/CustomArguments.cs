@@ -24,6 +24,12 @@ namespace com.udragan.csharp.TestApp.CommandLineArguments
 		public bool QSwitchProperty { get; private set; }
 
 		/// <summary>
+		/// Gets the value option property.
+		/// </summary>
+		[Option("-o", "Argument with value", DefaultValue = "Default")]
+		public string ValueOptionProperty { get; private set; }
+
+		/// <summary>
 		/// Gets a value of property not considered in parser.
 		/// </summary>
 		public bool NotSwitchProperty { get; private set; }
