@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using com.udragan.csharp.CommandLineParser.Attributes;
+using com.udragan.csharp.CommandLineParser.Strategies;
 
 namespace com.udragan.csharp.CommandLineParser.Arguments
 {
@@ -15,6 +16,7 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 		#region Members
 
 		private IDictionary<BaseAttribute, PropertyInfo> _mappedProperties = new Dictionary<BaseAttribute, PropertyInfo>();
+		private IList<IParseStrategy> _parseStrategies = new List<IParseStrategy>();
 
 		#endregion
 
@@ -46,6 +48,9 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 		/// <param name="args">The arguments.</param>
 		public GenericArguments(string[] args)
 		{
+			_parseStrategies.Add(new SwitchParseStrategy());
+			_parseStrategies.Add(new OptionParseStrategy());
+
 			_mappedProperties = ExtractClassArgumentProperties();
 
 			if (args.Contains(HelpSwitchAttribute.OptionName))
@@ -116,11 +121,21 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 
 				BaseAttribute attribute = _mappedProperties.Keys
 					.FirstOrDefault(x => x.OptionName.Equals(argument, StringComparison.OrdinalIgnoreCase));
+				IParseStrategy strategy = _parseStrategies.SingleOrDefault(x => x.CanParse(attribute));
 
-				if (attribute != null)
+				if (strategy != null)
 				{
-					PropertyInfo propertyInfo = _mappedProperties[attribute];
-					propertyInfo.SetValue(this, true);
+					object value = strategy.Parse(_mappedProperties, queue);
+
+					if (value != null)
+					{
+						PropertyInfo propertyInfo = _mappedProperties[attribute];
+						propertyInfo.SetValue(this, value);
+					}
+				}
+				else
+				{
+					Console.WriteLine("No strategy can parse argument: {0}", argument);
 				}
 			}
 		}
