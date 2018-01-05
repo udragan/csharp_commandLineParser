@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using com.udragan.csharp.CommandLineParser.Attributes;
+using com.udragan.csharp.CommandLineParser.Extensions;
 using com.udragan.csharp.CommandLineParser.Strategies;
 
 namespace com.udragan.csharp.CommandLineParser.Arguments
@@ -135,7 +136,7 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 				}
 				else
 				{
-					Console.WriteLine("No strategy can parse argument: {0}", argument);
+					Console.WriteLine("No strategy can parse argument: {0} of type: {1}", argument, attribute.GetType().GetName());
 				}
 			}
 		}
