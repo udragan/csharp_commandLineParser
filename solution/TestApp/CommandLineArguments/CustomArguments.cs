@@ -1,5 +1,7 @@
 ﻿using com.udragan.csharp.CommandLineParser.Arguments;
 using com.udragan.csharp.CommandLineParser.Attributes;
+using com.udragan.csharp.CommandLineParser.Depencencies;
+using com.udragan.csharp.CommandLineParser.Depencencies.Interfaces;
 
 namespace com.udragan.csharp.TestApp.CommandLineArguments
 {
@@ -41,9 +43,18 @@ namespace com.udragan.csharp.TestApp.CommandLineArguments
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CustomArguments"/> class.
 		/// </summary>
-		/// <param name="args">The command line arguments.</param>
+		/// <param name="args">The arguments.</param>
 		public CustomArguments(string[] args)
-			: base(args)
+			: base(args, new ConsoleLogger())
+		{ }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CustomArguments" /> class.
+		/// </summary>
+		/// <param name="args">The command line arguments.</param>
+		/// <param name="logger">The logger.</param>
+		public CustomArguments(string[] args, ILogger logger)
+			: base(args, logger)
 		{ }
 
 		#endregion

@@ -39,6 +39,8 @@
     <Compile Include="Attributes\BaseAttribute.cs" />
     <Compile Include="Attributes\OptionAttribute.cs" />
     <Compile Include="Attributes\SwitchAttribute.cs" />
+    <Compile Include="Depencencies\ConsoleLogger.cs" />
+    <Compile Include="Depencencies\Interfaces\ILogger.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="GenericArguments\GenericArguments.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

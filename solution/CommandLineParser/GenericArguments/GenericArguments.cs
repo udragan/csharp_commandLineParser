@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using com.udragan.csharp.CommandLineParser.Attributes;
+using com.udragan.csharp.CommandLineParser.Depencencies.Interfaces;
 using com.udragan.csharp.CommandLineParser.Extensions;
 using com.udragan.csharp.CommandLineParser.Strategies;
 using com.udragan.csharp.CommandLineParser.Strategies.Interfaces;
@@ -16,6 +17,8 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 	public abstract class GenericArguments
 	{
 		#region Members
+
+		private readonly ILogger _logger;
 
 		private IDictionary<BaseAttribute, PropertyInfo> _mappedProperties = new Dictionary<BaseAttribute, PropertyInfo>();
 		private IList<IParseStrategy> _parseStrategies = new List<IParseStrategy>();
@@ -45,11 +48,13 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="GenericArguments"/> class.
+		/// Initializes a new instance of the <see cref="GenericArguments" /> class.
 		/// </summary>
 		/// <param name="args">The arguments.</param>
-		public GenericArguments(string[] args)
+		/// <param name="logger">The logger.</param>
+		public GenericArguments(string[] args, ILogger logger)
 		{
+			_logger = logger;
 			_parseStrategies.Add(new SwitchParseStrategy());
 			_parseStrategies.Add(new OptionParseStrategy());
 
@@ -76,7 +81,7 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 		{
 			if (!_mappedProperties.Any())
 			{
-				Console.WriteLine("No options available.");
+				_logger.Log("No options available.");
 				return;
 			}
 
@@ -85,8 +90,9 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			//TODO: convert to factory.
 			foreach (KeyValuePair<BaseAttribute, PropertyInfo> item in _mappedProperties)
 			{
-				Console.Write(item.Value.Name.PadRight(maxArgumentLength + 2));
-				Console.WriteLine(item.Value.GetValue(this) ?? ((OptionAttribute)item.Key).DefaultValue);
+				string message = item.Value.Name.PadRight(maxArgumentLength + 2) +
+					item.Value.GetValue(this) ?? ((OptionAttribute)item.Key).DefaultValue;
+				_logger.Log(message);
 			}
 		}
 
@@ -137,7 +143,8 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 				}
 				else
 				{
-					Console.WriteLine("No strategy can parse argument: {0} of type: {1}", argument, attribute.GetType().GetName());
+					string message = string.Format("No strategy can parse argument: {0} of type: {1}", argument, attribute.GetType().GetName());
+					_logger.Log(message);
 				}
 			}
 		}
@@ -151,9 +158,10 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			{
 				BaseAttribute customAttribute = (BaseAttribute)item.GetCustomAttributes(typeof(BaseAttribute)).First();
 
-				Console.Write(customAttribute.OptionName.PadRight(maxArgumentLength + 2));
-				Console.Write(customAttribute.Help);
-				Console.WriteLine(customAttribute.Required ? " <Required>" : string.Empty);
+				string message = customAttribute.OptionName.PadRight(maxArgumentLength + 2) +
+					customAttribute.Help +
+					(customAttribute.Required ? " <Required>" : string.Empty);
+				_logger.Log(message);
 			}
 		}
 
