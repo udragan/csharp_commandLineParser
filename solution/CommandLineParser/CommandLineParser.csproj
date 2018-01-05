@@ -42,7 +42,7 @@
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="GenericArguments\GenericArguments.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Strategies\IParseStrategy.cs" />
+    <Compile Include="Strategies\Interfaces\IParseStrategy.cs" />
     <Compile Include="Strategies\OptionParseStrategy.cs" />
     <Compile Include="Strategies\SwitchParseStrategy.cs" />
   </ItemGroup>

@@ -2,7 +2,7 @@
 using System.Reflection;
 using com.udragan.csharp.CommandLineParser.Attributes;
 
-namespace com.udragan.csharp.CommandLineParser.Strategies
+namespace com.udragan.csharp.CommandLineParser.Strategies.Interfaces
 {
 	/// <summary>
 	/// Common interface for all parse strategies.

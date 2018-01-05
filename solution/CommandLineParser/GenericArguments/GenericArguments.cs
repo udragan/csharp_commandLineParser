@@ -6,6 +6,7 @@ using System.Reflection;
 using com.udragan.csharp.CommandLineParser.Attributes;
 using com.udragan.csharp.CommandLineParser.Extensions;
 using com.udragan.csharp.CommandLineParser.Strategies;
+using com.udragan.csharp.CommandLineParser.Strategies.Interfaces;
 
 namespace com.udragan.csharp.CommandLineParser.Arguments
 {
