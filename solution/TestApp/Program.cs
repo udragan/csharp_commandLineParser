@@ -1,5 +1,6 @@
 ﻿using System;
 using com.udragan.csharp.TestApp.CommandLineArguments;
+using com.udragan.csharp.TestApp.Loggers;
 
 namespace com.udragan.csharp.TestApp
 {
@@ -7,7 +8,10 @@ namespace com.udragan.csharp.TestApp
 	{
 		static void Main(string[] args)
 		{
-			CustomArguments co = new CustomArguments(args);
+			FileLogger fl = new FileLogger("bla.txt");
+
+
+			CustomArguments co = new CustomArguments(args, fl);
 
 			co.DisplayOptions();
 
