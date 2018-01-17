@@ -10,10 +10,12 @@ namespace com.udragan.csharp.TestApp
 		{
 			FileLogger fl = new FileLogger("bla.txt");
 
+			CustomArguments co = new CustomArguments(args);
 
-			CustomArguments co = new CustomArguments(args, fl);
-
-			co.DisplayOptions();
+			if (co.IsValid)
+			{
+				co.DisplayOptions();
+			}
 
 			Console.ReadLine();
 		}

@@ -20,8 +20,19 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 
 		private readonly ILogger _logger;
 
-		private IDictionary<BaseAttribute, PropertyInfo> _mappedProperties = new Dictionary<BaseAttribute, PropertyInfo>();
 		private IList<IParseStrategy> _parseStrategies = new List<IParseStrategy>();
+		private IDictionary<BaseAttribute, PropertyInfo> _mappedProperties = new Dictionary<BaseAttribute, PropertyInfo>();
+		private HashSet<string> _mandatoryArguments = new HashSet<string>();
+
+		private SwitchAttribute HelpSwitchAttribute
+		{
+			get
+			{
+				return (SwitchAttribute)this.GetType()
+					.GetProperty("Help")
+					.GetCustomAttribute(typeof(SwitchAttribute));
+			}
+		}
 
 		#endregion
 
@@ -33,14 +44,12 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 		[Switch("/h", "Display help.")]
 		public virtual bool Help { get; set; }
 
-		private SwitchAttribute HelpSwitchAttribute
+		/// <summary>
+		/// Returns true if all mandatory arguments are provided, otherwise false.
+		/// </summary>
+		public bool IsValid
 		{
-			get
-			{
-				return (SwitchAttribute)this.GetType()
-					.GetProperty("Help")
-					.GetCustomAttribute(typeof(SwitchAttribute));
-			}
+			get { return _mandatoryArguments.Count == 0; }
 		}
 
 		#endregion
@@ -59,6 +68,11 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			_parseStrategies.Add(new OptionParseStrategy());
 
 			_mappedProperties = ExtractClassArgumentProperties();
+			_mandatoryArguments = new HashSet<string>(
+				_mappedProperties
+				.Where(x => x.Key.Required)
+				.Select(x => x.Key.OptionName)
+				.ToList());
 
 			if (args.Contains(HelpSwitchAttribute.OptionName))
 			{
@@ -67,6 +81,11 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			}
 
 			ProcessArguments(args);
+
+			if (!IsValid)
+			{
+				DisplayHelp();
+			}
 		}
 
 		#endregion
@@ -85,12 +104,12 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 				return;
 			}
 
-			int maxArgumentLength = _mappedProperties.Values.Max(x => x.Name.Length);
+			int maxArgumentLength = _mappedProperties.Keys.Max(x => x.OptionName.Length);
 
 			//TODO: convert to factory.
 			foreach (KeyValuePair<BaseAttribute, PropertyInfo> item in _mappedProperties)
 			{
-				string message = item.Value.Name.PadRight(maxArgumentLength + 2) +
+				string message = item.Key.OptionName.PadRight(maxArgumentLength + 2) +
 					item.Value.GetValue(this) ?? ((OptionAttribute)item.Key).DefaultValue;
 				_logger.Log(message);
 			}
@@ -119,36 +138,6 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			return result;
 		}
 
-		private void ProcessArguments(string[] args)
-		{
-			Queue<string> queue = new Queue<string>(args);
-
-			while (queue.Count > 0)
-			{
-				string argument = queue.Dequeue();
-
-				BaseAttribute attribute = _mappedProperties.Keys
-					.FirstOrDefault(x => x.OptionName.Equals(argument, StringComparison.OrdinalIgnoreCase));
-				IParseStrategy strategy = _parseStrategies.SingleOrDefault(x => x.CanParse(attribute));
-
-				if (strategy != null)
-				{
-					object value = strategy.Parse(_mappedProperties, queue);
-
-					if (value != null)
-					{
-						PropertyInfo propertyInfo = _mappedProperties[attribute];
-						propertyInfo.SetValue(this, value);
-					}
-				}
-				else
-				{
-					string message = string.Format("No strategy can parse argument: {0} of type: {1}", argument, attribute.GetType().GetName());
-					_logger.Log(message);
-				}
-			}
-		}
-
 		[Pure]
 		private void DisplayHelp()
 		{
@@ -162,6 +151,43 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 					customAttribute.Help +
 					(customAttribute.Required ? " <Required>" : string.Empty);
 				_logger.Log(message);
+			}
+		}
+
+		private void ProcessArguments(string[] args)
+		{
+			Queue<string> queue = new Queue<string>(args);
+
+			while (queue.Count > 0)
+			{
+				string argument = queue.Dequeue();
+
+				BaseAttribute attribute = _mappedProperties.Keys
+					.FirstOrDefault(x => x.OptionName.Equals(argument, StringComparison.OrdinalIgnoreCase));
+
+				if (attribute == null)
+				{
+					string message = string.Format("No attribute registered: {0}", argument);
+					_logger.Log(message);
+
+					continue;
+				}
+
+				IParseStrategy strategy = _parseStrategies.SingleOrDefault(x => x.CanParse(attribute));
+
+				if (strategy == null)
+				{
+					string message = string.Format("No strategy can parse argument: {0} of type: {1}", argument, attribute.GetType().GetName());
+					_logger.Log(message);
+
+					continue;
+				}
+
+				strategy.Parse(this, _mappedProperties, queue, attribute);
+
+				_mandatoryArguments.Remove(attribute.OptionName);
+
+				//TODO: done - added baseStrategy and moved value update to strategies
 			}
 		}
 
