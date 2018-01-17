@@ -186,8 +186,6 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 				strategy.Parse(this, _mappedProperties, queue, attribute);
 
 				_mandatoryArguments.Remove(attribute.OptionName);
-
-				//TODO: done - added baseStrategy and moved value update to strategies
 			}
 		}
 
