@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
+using com.udragan.csharp.CommandLineParser.Arguments;
 using com.udragan.csharp.CommandLineParser.Attributes;
 
 namespace com.udragan.csharp.CommandLineParser.Strategies.Interfaces
@@ -12,13 +13,14 @@ namespace com.udragan.csharp.CommandLineParser.Strategies.Interfaces
 		/// <summary>
 		/// Parses the specified mapped properties.
 		/// </summary>
+		/// <param name="genericArguments">The generic arguments class.</param>
 		/// <param name="mappedProperties">The mapped properties.</param>
 		/// <param name="argumentsQueue">The arguments queue.</param>
-		/// <returns>
-		/// Parsed value.
-		/// </returns>
-		object Parse(IDictionary<BaseAttribute, PropertyInfo> mappedProperties,
-			Queue<string> argumentsQueue);
+		/// <param name="attribute">The attribute.</param>
+		void Parse(GenericArguments genericArguments,
+			IDictionary<BaseAttribute, PropertyInfo> mappedProperties,
+			Queue<string> argumentsQueue,
+			BaseAttribute attribute);
 
 		/// <summary>
 		/// Determines whether this instance can parse the specified attribute.
