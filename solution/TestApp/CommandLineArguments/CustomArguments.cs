@@ -1,4 +1,5 @@
-﻿using com.udragan.csharp.CommandLineParser.Arguments;
+﻿using System.Collections.Generic;
+using com.udragan.csharp.CommandLineParser.Arguments;
 using com.udragan.csharp.CommandLineParser.Attributes;
 using com.udragan.csharp.CommandLineParser.Depencencies;
 using com.udragan.csharp.CommandLineParser.Depencencies.Interfaces;
@@ -30,6 +31,12 @@ namespace com.udragan.csharp.TestApp.CommandLineArguments
 		/// </summary>
 		[Option("-o", "Argument with value", DefaultValue = "Default")]
 		public string ValueOptionProperty { get; private set; }
+
+		/// <summary>
+		/// Gets the option list property.
+		/// </summary>
+		[OptionList("-p", "Argument list")]
+		public IList<string> OptionListProperty { get; private set; }
 
 		/// <summary>
 		/// Gets a value of property not considered in parser.

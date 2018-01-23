@@ -66,6 +66,7 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			_logger = logger;
 			_parseStrategies.Add(new SwitchParseStrategy());
 			_parseStrategies.Add(new OptionParseStrategy());
+			_parseStrategies.Add(new OptionListParseStrategy());
 
 			_mappedProperties = ExtractClassArgumentProperties();
 			_mandatoryArguments = new HashSet<string>(
@@ -110,7 +111,7 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			foreach (KeyValuePair<BaseAttribute, PropertyInfo> item in _mappedProperties)
 			{
 				string message = item.Key.OptionName.PadRight(maxArgumentLength + 2) +
-					item.Value.GetValue(this) ?? ((OptionAttribute)item.Key).DefaultValue;
+					item.Value.ToString(this) ?? ((OptionAttribute)item.Key).DefaultValue;
 				_logger.Log(message);
 			}
 		}
@@ -124,12 +125,12 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 		{
 			IDictionary<BaseAttribute, PropertyInfo> result = new Dictionary<BaseAttribute, PropertyInfo>();
 
-			PropertyInfo[] switchArgumentProperties = this.GetType()
+			PropertyInfo[] argumentProperties = this.GetType()
 				.GetProperties()
 				.Where(x => x.IsDefined(typeof(BaseAttribute)))
 				.ToArray();
 
-			foreach (PropertyInfo item in switchArgumentProperties)
+			foreach (PropertyInfo item in argumentProperties)
 			{
 				BaseAttribute customAttribute = (BaseAttribute)item.GetCustomAttribute(typeof(BaseAttribute));
 				result[customAttribute] = item;
