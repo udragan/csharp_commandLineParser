@@ -33,9 +33,6 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Attributes\BaseAttribute.cs" />
     <Compile Include="Attributes\OptionAttribute.cs" />
     <Compile Include="Attributes\OptionListAttribute.cs" />
@@ -52,7 +49,16 @@
     <Compile Include="Strategies\OptionParseStrategy.cs" />
     <Compile Include="Strategies\SwitchParseStrategy.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if $(ConfigurationName) == Release (
+    xcopy $(TargetDir)$(TargetName).* $(SolutionDir)nuget\lib\ /y
+)
+</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
