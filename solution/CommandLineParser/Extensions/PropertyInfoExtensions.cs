@@ -23,16 +23,17 @@ namespace com.udragan.csharp.CommandLineParser.Extensions
 
 			var val = value.GetValue(parent);
 
+			if (val == null)
+			{
+				return null;
+			}
+
 			if (propertyType == typeof(IList<string>))
 			{
-				var v = val as IList<string>;
-
 				return string.Join(Environment.NewLine + "\t", val as IList<string>);
 			}
 
-			return val != null ?
-				val.ToString() :
-				null;
+			return val.ToString();
 		}
 	}
 }
