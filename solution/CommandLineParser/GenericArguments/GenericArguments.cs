@@ -69,6 +69,9 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 			_parseStrategies.Add(new OptionListParseStrategy());
 
 			_mappedProperties = ExtractClassArgumentProperties();
+
+			SetDefaultValues();
+
 			_mandatoryArguments = new HashSet<string>(
 				_mappedProperties
 				.Where(x => x.Key.Required)
@@ -152,6 +155,19 @@ namespace com.udragan.csharp.CommandLineParser.Arguments
 					customAttribute.Help +
 					(customAttribute.Required ? " <Required>" : string.Empty);
 				_logger.Log(message);
+			}
+		}
+
+		private void SetDefaultValues()
+		{
+			foreach (var item in _mappedProperties)
+			{
+				PropertyInfo defaultValueProperty = item.Key.GetType().GetProperty("DefaultValue");
+
+				if (defaultValueProperty != null && defaultValueProperty.GetValue(item.Key) != null)
+				{
+					item.Value.SetValue(this, defaultValueProperty.GetValue(item.Key));
+				}
 			}
 		}
 
