@@ -24,7 +24,9 @@ namespace com.udragan.csharp.CommandLineParser.Attributes
 		/// <param optionName="help">The help text.</param>
 		public OptionAttribute(string optionName, string help)
 			: base(optionName, help)
-		{ }
+		{
+			_defaultValue = string.Empty;
+		}
 
 		#endregion
 
