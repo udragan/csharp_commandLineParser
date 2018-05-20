@@ -14,6 +14,7 @@ namespace com.udragan.csharp.TestApp.Loggers
 
 		private readonly string _fileName;
 		private readonly string _filePath;
+
 		#endregion
 
 		#region Constructors
@@ -25,7 +26,6 @@ namespace com.udragan.csharp.TestApp.Loggers
 		public FileLogger(string fileName)
 			: this(fileName, Directory.GetCurrentDirectory())
 		{ }
-
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="FileLogger"/> class.
